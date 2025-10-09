@@ -1,3 +1,4 @@
+import 'package:emergingtech_gasal2425_louis/Quiz.dart';
 import 'package:emergingtech_gasal2425_louis/about.dart';
 import 'package:emergingtech_gasal2425_louis/class/addrecipe.dart';
 import 'package:flutter/material.dart';
@@ -29,6 +30,7 @@ class MyApp extends StatelessWidget {
         'basket': (context) => Basket(), //disini juga, tapi karena isi basket ada yang mau di ubah, jadi const diilangi
         'StudentList': (context) => const StudentList(),
         'AddRecipes': (context) => const AddRecipe(),
+        'Quiz': (context) => const Quiz(),
         },
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -156,6 +158,14 @@ class _MyHomePageState extends State<MyHomePage> {
               leading: Icon(Icons.add),
               onTap: () {
                 Navigator.pushNamed(context, "AddRecipes"
+                );
+              },
+            ),
+            ListTile(
+              title: Text("Quiz"),
+              leading: Icon(Icons.book),
+              onTap: () {
+                Navigator.pushNamed(context, "Quiz"
                 );
               },
             ),
