@@ -58,6 +58,11 @@ flutter:
     - assets/missing.png
     - assets/background.png
     - assets/ilcapitano.png
+    - assets/city.jpeg
+    - assets/earth.png
+    - assets/hulk.jpeg
+    - assets/mark.jpeg
+    - assets/ufo.gif
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

@@ -11,6 +11,7 @@ import 'search.dart';
 import 'history.dart';
 import 'studentlist.dart';
 import 'login.dart';
+import 'animasi.dart';
 
 String active_user = "";
 
@@ -93,6 +94,7 @@ class MyApp extends StatelessWidget {
         'AddRecipes': (context) => const AddRecipe(),
         'Quiz': (context) => const Quiz(),
         'login': (context) => MyLogin(),
+        'Animasi': (context) => const Animasi(),
       },
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -187,6 +189,13 @@ class _MyHomePageState extends State<MyHomePage> {
               leading: const Icon(Icons.book),
               onTap: () {
                 Navigator.pushNamed(context, "Quiz");
+              },
+            ),
+            ListTile(
+              title: const Text("Animasi"),
+              leading: const Icon(Icons.piano),
+              onTap: () {
+                Navigator.pushNamed(context, "Animasi");
               },
             ),
             ListTile(
