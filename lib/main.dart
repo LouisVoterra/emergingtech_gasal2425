@@ -1,37 +1,99 @@
+import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+// Import halaman lain
 import 'package:emergingtech_gasal2425_louis/Quiz.dart';
 import 'package:emergingtech_gasal2425_louis/about.dart';
 import 'package:emergingtech_gasal2425_louis/class/addrecipe.dart';
-import 'package:flutter/material.dart';
 import 'basket.dart';
 import 'home.dart';
 import 'search.dart';
 import 'history.dart';
 import 'studentlist.dart';
+import 'login.dart';
 
-void main() {
-  runApp(const MyApp());
+String active_user = "";
+
+
+
+
+Future<String> checkUser() async {
+  final prefs = await SharedPreferences.getInstance();
+  String user_id = prefs.getString("user_id") ?? '';
+  return user_id;
 }
+
+Future<void> doLogin(String userId, BuildContext context) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.setString("user_id", userId);
+  active_user = userId;
+
+// void doLogin() async {
+//   final prefs = await SharedPreferences.getInstance();
+//   prefs.setString("user_id", active_user);
+//   main();
+
+  // arahkan ke halaman utama, bukan panggil main()
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (_) => const MyApp()),
+  );
+}
+
+Future<void> doLogout(BuildContext context) async {
+  final prefs = await SharedPreferences.getInstance();
+  await prefs.remove("user_id");
+  active_user = "";
+
+  Navigator.pushReplacement(
+    context,
+    MaterialPageRoute(builder: (_) => MyLogin()),
+  );
+}
+
+//cara pak andre
+void main(){
+  WidgetsFlutterBinding.ensureInitialized();
+  checkUser().then((String result){
+    if (result == ""){
+      runApp(MyLogin());
+    }else{
+      runApp(MyApp());
+    }
+  });
+}
+    
+
+// Future<void> main() async {
+//   WidgetsFlutterBinding.ensureInitialized();
+//   String result = await checkUser();
+
+//   if (result.isEmpty) {
+//     runApp(MyLogin());
+//   } else {
+//     active_user = result;
+//     runApp(const MyApp());
+//   }
+// }
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
- 
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
-       
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),
-      routes: 
-      {
-        'about': (context) => const About(), //ada const ini gabisa diubah
-        'basket': (context) => Basket(), //disini juga, tapi karena isi basket ada yang mau di ubah, jadi const diilangi
+      routes: {
+        'about': (context) => const About(),
+        'basket': (context) => Basket(),
         'StudentList': (context) => const StudentList(),
         'AddRecipes': (context) => const AddRecipe(),
         'Quiz': (context) => const Quiz(),
-        },
+        'login': (context) => MyLogin(),
+      },
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
@@ -46,127 +108,92 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  // int _counter = 0;
-  // String _emojiText = "";
-
   int _currentIndex = 0;
   final List<Widget> _screens = [Home(), Search(), History()];
   final List<String> _titles = ["Home", "Search", "History"];
 
-
-  // void _incrementCounter() {
-  //   setState(() {
-      
-  //     // _counter++;
-  //     // String result = "";
-  //     // for (int i = 1; i <= _counter; i++) {
-  //     //   if (i % 5 == 0) {
-  //     //     result += String.fromCharCode(0x1F621); 
-  //     //   } else {
-  //     //     result += String.fromCharCode(0x1F600);
-  //     //   }
-  //     // }
-  //     // _emojiText = result;
-      
-  //   });
-  // }
+  @override
+  void initState() {
+    super.initState();
+    checkUser().then((value) {
+      setState(() {
+        active_user = value;
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
-    
     return Scaffold(
       appBar: AppBar(
-        
         backgroundColor: Theme.of(context).colorScheme.primary,
-       
         title: Text(_titles[_currentIndex]),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () => doLogout(context),
+          ),
+        ],
       ),
       body: _screens[_currentIndex],
-      // Center(
-        
-      //   child: Column(
-          
-      //     mainAxisAlignment: MainAxisAlignment.center,
-      //     children: <Widget>[
-      //       const Text('You have pushed the button this many times:'),
-      //       Text(
-      //         '$_counter',
-      //         style: Theme.of(context).textTheme.headlineMedium,
-      //       ),
-      //       const Text('Nama : Louis Dewa Voterra'),
-      //       const Text('NRP : 160422077'),
-            
-      //       const SizedBox(height: 20),
-      //       Text(
-      //         _emojiText.isEmpty ? "Belum ada emoji" : _emojiText,
-      //         style: const TextStyle(fontSize: 30, color: Colors.black),
-      //       )
-      //     ],
-      //   ),
-      // ),
-      
-      // floatingActionButton: FloatingActionButton(
-      //   onPressed: _incrementCounter,
-      //   tooltip: 'Increment',
-      //   child: const Icon(Icons.add),
-      // ), 
       drawer: Drawer(
         elevation: 16.0,
         child: Column(
           children: <Widget>[
             UserAccountsDrawerHeader(
-              accountName: Text("Louis Dewa Voterra"),
-              accountEmail: Text("s160422077@student.ubaya.ac.id"),
-              currentAccountPicture: CircleAvatar(
-                backgroundImage: NetworkImage("https://my.ubaya.ac.id/img/mhs/160422077_l.jpg"),
+              accountName: const Text("Louis Dewa Voterra"),
+              accountEmail: Text(active_user.isEmpty ? "Loading..." : active_user),
+              currentAccountPicture: const CircleAvatar(
+                backgroundImage: NetworkImage(
+                  "https://my.ubaya.ac.id/img/mhs/160422077_l.jpg",
+                ),
               ),
             ),
             ListTile(
-              title: Text("Inbox"),
-              leading: Icon(Icons.inbox),
+              title: const Text("Inbox"),
+              leading: const Icon(Icons.inbox),
               onTap: () {},
             ),
             ListTile(
-              title: Text("My Basket"),
-              leading: Icon(Icons.shopping_basket),
+              title: const Text("My Basket"),
+              leading: const Icon(Icons.shopping_basket),
               onTap: () {
-                Navigator.pushNamed(context, "basket"
-                );
+                Navigator.pushNamed(context, "basket");
               },
             ),
             ListTile(
               title: const Text("About"),
               leading: const Icon(Icons.help),
               onTap: () {
-                Navigator.pushNamed(
-                  context,"about"
-                  
-                  // MaterialPageRoute(builder: (context) => const About()),
-                );
+                Navigator.pushNamed(context, "about");
               },
             ),
             ListTile(
-              title: Text("Student List"),
-              leading: Icon(Icons.person),
+              title: const Text("Student List"),
+              leading: const Icon(Icons.person),
               onTap: () {
-                Navigator.pushNamed(context, "StudentList"
-                );
+                Navigator.pushNamed(context, "StudentList");
               },
             ),
             ListTile(
-              title: Text("Add Recipe"),
-              leading: Icon(Icons.add),
+              title: const Text("Add Recipe"),
+              leading: const Icon(Icons.add),
               onTap: () {
-                Navigator.pushNamed(context, "AddRecipes"
-                );
+                Navigator.pushNamed(context, "AddRecipes");
               },
             ),
             ListTile(
-              title: Text("Quiz"),
-              leading: Icon(Icons.book),
+              title: const Text("Quiz"),
+              leading: const Icon(Icons.book),
               onTap: () {
-                Navigator.pushNamed(context, "Quiz"
-                );
+                Navigator.pushNamed(context, "Quiz");
+              },
+            ),
+            ListTile(
+              title: const Text("Logout"),
+              leading: const Icon(Icons.logout),
+              onTap: () {
+                doLogout(context);
               },
             ),
           ],
@@ -198,10 +225,7 @@ class _MyHomePageState extends State<MyHomePage> {
             label: "History",
             icon: Icon(Icons.history),
           ),
-    
-          
         ],
-       
         onTap: (int index) {
           setState(() {
             _currentIndex = index;
