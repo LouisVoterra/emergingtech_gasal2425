@@ -25,35 +25,34 @@ class _AnimasiState extends State<Animasi>{
     super.initState();
     _timer = Timer.periodic(Duration(seconds: 3), (timer) {
       setState(() {
-        _animated = false; //jika animated true maka akan menjadi false dan sebaliknya
+        // _animated = false; //jika animated true maka akan menjadi false dan sebaliknya
         _posisi++;
         if (_posisi > 4) _posisi = 1;
 
         if (_posisi == 1) {
-                  _left = 300;
-                  _top = 0;
-                  _wh = 40;
+          _left = 300;
+          _top = 0;
+          _wh = 40;
         }
         if (_posisi == 2) {
-                  _left = 0;
-                  _top = 0;
-                  _wh = 40;
+          _left = 0;
+          _top = 0;
+          _wh = 40;
         }
         if (_posisi == 3) {
-                  _left = 0;
-                  _top = 140;
-                  _wh = 160;
+          _left = 0;
+          _top = 140;
+          _wh = 160;
         }
         if (_posisi == 4) {
-                  _left = 300;
-                  _top = 140;
-                  _wh = 160;
+          _left = 300;
+          _top = 140;
+          _wh = 160;
         }
-
       });
     });
 
-    _timer2 = Timer.periodic(Duration(milliseconds: 5000), 
+    _timer2 = Timer.periodic(Duration(milliseconds: 5), 
     (timer){
       setState(() {
         _opacitylevel = 1.0 - _opacitylevel;
@@ -89,7 +88,6 @@ class _AnimasiState extends State<Animasi>{
       body: SingleChildScrollView(
         child: Column(
           children: <Widget>[
-
               TweenAnimationBuilder(
                     duration: const Duration(seconds: 20),
                     tween: Tween<double>(begin: 0, end: 5 * math.pi),
@@ -111,48 +109,47 @@ class _AnimasiState extends State<Animasi>{
                     );
                     },
                   ),
-
-            Container(
-              width: 400,
-              height: 300,
-              child: Stack(children: [
-                Image.asset("../assets/city.jpeg",scale: 0.5,
-                ),
-                AnimatedPositioned(
-                  duration: const Duration(seconds: 3),
-                  curve: Curves.fastOutSlowIn,
-                  left: _left,
-                  top: _top,
-                  child: Image(image: AssetImage("../assets/ufo.gif"),
-                  fit: BoxFit.scaleDown,
-                  width: 100,
-                  height: 100
+              Container(
+                width: 400,
+                height: 300,
+                child: Stack(children: [
+                  Image.asset("../assets/city.jpeg",scale: 0.5,
                   ),
-                 ),
-                 AnimatedContainer(
-                      duration: const Duration(seconds: 3),
-                    width: _wh,
-                    height: _wh, 
-                    child: Image.asset("../assets/ufo.gif"),
-                  )
+                  AnimatedPositioned(
+                    duration: const Duration(seconds: 3),
+                    curve: Curves.fastOutSlowIn,
+                    left: _left,
+                    top: _top,
+                    child: Image(image: AssetImage("../assets/ufo.gif"),
+                    fit: BoxFit.scaleDown,
+                    width: 100,
+                    height: 100
+                    ),
+                  ),
+                  AnimatedContainer(
+                        duration: const Duration(seconds: 3),
+                      width: _wh,
+                      height: _wh, 
+                      child: Image.asset("../assets/ufo.gif"),
+                    )
 
-              ])
-            ),
-            AnimatedDefaultTextStyle(
-              style: _animated ?
-              TextStyle(color: Colors.blue, fontSize: 60) :
-              TextStyle(color: Colors.red, fontSize: 14),
-              duration: Duration(seconds: 1),
-              child: Text("Animate"),
+                ])
               ),
-              TextButton(
-                onPressed: (){
-                  setState(() {
-                    _animated = !_animated; //jika animated true maka akan menjadi false dan sebaliknya
-                  });
-                },
-                child: const Text("Animate"),
-              ),
+              AnimatedDefaultTextStyle(
+                style: _animated ?
+                TextStyle(color: Colors.blue, fontSize: 60) :
+                TextStyle(color: Colors.red, fontSize: 14),
+                duration: Duration(seconds: 1),
+                child: Text("Animate"),
+                ),
+                TextButton(
+                  onPressed: (){
+                    setState(() {
+                      _animated = !_animated; //jika animated true maka akan menjadi false dan sebaliknya
+                    });
+                  },
+                  child: const Text("Animate"),
+                ),
               SizedBox(
                 width: 250.0,
                 height: 250.0,
@@ -175,7 +172,7 @@ class _AnimasiState extends State<Animasi>{
                 height: 250.0,
                 child: AnimatedOpacity(
                   opacity: _opacitylevel, 
-                  duration: const Duration(seconds: 5),
+                  duration: const Duration(seconds: 2),
                   child: Image.network('https://i.pravatar.cc/240?img=6'),),
               ),
               AnimatedContainer(
@@ -224,22 +221,16 @@ class _AnimasiState extends State<Animasi>{
                     ),
                 ),
                 AnimatedSwitcher(
-                  duration: const Duration(seconds: 2),
-                  transitionBuilder: (Widget child, Animation<double> animation){
-                    return RotationTransition(turns: animation, child: child);
-                    //return ScaleTransition(child: child, scale: animation);
-                    
-                  },
-                  child: _animated? widget1() : widget2(),
-                )
-              
+                    duration: const Duration(seconds: 2),
+                    transitionBuilder: (Widget child, Animation<double> animation) {
+                      return RotationTransition(turns: animation, child: child);
+                      // return ScaleTransition(child: child, scale: animation);
+                    },
+                    child: _animated ? widget1() : widget2(),
+                 )
           ],
         ),
       ),
     );
-
-    
   }
-
-  
 }
