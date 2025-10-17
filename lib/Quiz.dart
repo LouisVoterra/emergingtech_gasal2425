@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:percent_indicator/percent_indicator.dart';
@@ -19,16 +21,18 @@ class Question {
   String optionC;
   String optionD;
   String answer;
+  String image;
 
   Question(this.narration, this.optionA, this.optionB, this.optionC,
-      this.optionD, this.answer);
+      this.optionD, this.answer, this.image);
 }
 
 class _QuizState extends State<Quiz> {
-  int _hitung = 30;
+  int _hitung = 10;
   late Timer _timer;
   bool _isRunning = false;
-  final int _initValue = 30;
+  final int _initValue = 10;
+  List<Question> _allQuestions = [];
   List<Question> _questions = [];
   int _question_no = 0;
   int _point = 0;
@@ -38,16 +42,34 @@ class _QuizState extends State<Quiz> {
     super.initState();
 
     
-    _questions = [
+    _allQuestions = [
       Question("Not a member of Avenger", 'Ironman', 'Spiderman', 'Thor',
-          'Hulk Hogan', 'Hulk Hogan'),
+          'Hulk Hogan', 'Hulk Hogan',"assets/avengers.png"),
       Question("Not a member of Teletubbies", 'Dipsy', 'Patrick', 'Laalaa',
-          'Poo', 'Patrick'),
+          'Poo', 'Patrick',"assets/teletubbies.png"),
       Question("Not a member of Justice League", 'Batman', 'Aquades',
-          'Superman', 'Flash', 'Aquades'),
+          'Superman', 'Flash', 'Aquades',"assets/justiceleague.png"),
       Question("Not a member of BTS", 'Jungkook', 'Jimin', 'Gong Yoo', 'Suga',
-          'Gong Yoo'),
+          'Gong Yoo',"assets/bts.png"),
+      Question("Which is not a programming language?", "Python", "Java", "Ruby",
+          "Panda", "Panda", "assets/programming.png"),
+      Question("Which animal cannot fly?", "Eagle", "Parrot", "Chicken",
+          "Bat", "Chicken", "assets/animals.png"),
+      Question("Which planet is known as the Red Planet?", "Earth", "Mars",
+          "Venus", "Jupiter", "Mars", "assets/mars.png"),
+      Question("Which one is not a fruit?", "Apple", "Carrot", "Banana",
+          "Grapes", "Carrot", "assets/fruit.jpg"),
+      Question("Which device is used to take photos?", "Microwave", "Camera",
+          "Printer", "Fan", "Camera", "assets/camera.png"),
+      Question("Which one is not a web browser?", "Chrome", "Edge", "Excel",
+          "Firefox", "Excel", "assets/browser.png"),
     ];
+
+    _allQuestions.shuffle(Random());
+    _questions = _allQuestions.take(5).toList();
+    
+
+
   }
 
   String formatTime(int hitung) {
@@ -57,35 +79,56 @@ class _QuizState extends State<Quiz> {
     return "$hours:$minutes:$seconds";
   }
 
+  // void startTimer() {
+  //   _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+  //     setState(() {
+  //       if (_hitung == 0) {
+  //         _timer.cancel();
+  //         _isRunning = false;
+  //         showDialog<String>(
+  //           context: context,
+  //           builder: (BuildContext context) => AlertDialog(
+  //             title: const Text('Quiz'),
+  //             content: Text('Quiz Ended!\nYour Score: $_point'),
+  //             actions: <Widget>[
+  //               TextButton(
+  //                 onPressed: () {
+  //                   Navigator.pop(context, 'OK');
+  //                   resetQuiz();
+  //                 },
+  //                 child: const Text('OK'),
+  //               ),
+  //             ],
+  //           ),
+  //         );
+  //       } else {
+  //         _hitung--;
+  //       }
+  //     });
+  //   });
+  //   _isRunning = true;
+  // }
+
   void startTimer() {
-    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      setState(() {
-        if (_hitung == 0) {
-          _timer.cancel();
-          _isRunning = false;
-          showDialog<String>(
-            context: context,
-            builder: (BuildContext context) => AlertDialog(
-              title: const Text('Quiz'),
-              content: Text('Quiz Ended!\nYour Score: $_point'),
-              actions: <Widget>[
-                TextButton(
-                  onPressed: () {
-                    Navigator.pop(context, 'OK');
-                    resetQuiz();
-                  },
-                  child: const Text('OK'),
-                ),
-              ],
-            ),
-          );
+  _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+    setState(() {
+      if (_hitung > 0) {
+        _hitung--;
+      } else {
+        // Timer is up
+        if (_question_no < _questions.length - 1) {
+          // Move to next question
+          _question_no++;
+          _hitung = _initValue; // reset timer
         } else {
-          _hitung--;
+          // Last question — end game
+          endgame();
         }
-      });
+      }
     });
-    _isRunning = true;
-  }
+  });
+  _isRunning = true;
+}
 
   void stopTimer() {
     _timer.cancel();
@@ -106,7 +149,7 @@ class _QuizState extends State<Quiz> {
   void checkAnswer(String selectedOption) {
     String correctAnswer = _questions[_question_no].answer;
     if (selectedOption == correctAnswer) {
-      _point += 10;
+      _point += 100;
     }
 
     if (_question_no < _questions.length - 1) {
@@ -114,7 +157,12 @@ class _QuizState extends State<Quiz> {
         _question_no++;
       });
     } else {
-      _timer.cancel();
+      endgame();
+    }
+  }
+
+  void endgame(){
+    _timer.cancel();
       _isRunning = false;
       showDialog<String>(
         context: context,
@@ -132,7 +180,6 @@ class _QuizState extends State<Quiz> {
           ],
         ),
       );
-    }
   }
 
   @override
@@ -141,19 +188,20 @@ class _QuizState extends State<Quiz> {
     super.dispose();
   }
 
+  
+
   @override
   Widget build(BuildContext context) {
     double percent =
         _initValue == 0 ? 0 : (1 - (_hitung / _initValue).clamp(0, 1));
 
-    // Cegah error saat belum ada pertanyaan
     final question = _questions.isNotEmpty
         ? _questions[_question_no]
-        : Question("", "", "", "", "", "");
+        : Question("", "", "", "", "", "", "");
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Quiz'),
+        title: const Text('Quiz Challenge'),
       ),
       body: Center(
         child: Padding(
@@ -174,7 +222,14 @@ class _QuizState extends State<Quiz> {
                 backgroundColor: Colors.grey[300]!,
                 circularStrokeCap: CircularStrokeCap.round,
               ),
-              const SizedBox(height: 30),
+              const SizedBox(height: 20),
+              Image.asset(
+                question.image,
+                height: 150,
+                width: 150,
+                fit: BoxFit.cover,
+              ),
+              const SizedBox(height: 20),
               Text(
                 "Q${_question_no + 1}: ${question.narration}",
                 style:
@@ -182,25 +237,20 @@ class _QuizState extends State<Quiz> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 20),
-             
-              TextButton(
-                  onPressed: () =>
-                      checkAnswer(_questions[_question_no].optionA),
-                  child: Text("A. ${_questions[_question_no].optionA}")),
-              TextButton(
-                  onPressed: () =>
-                      checkAnswer(_questions[_question_no].optionB),
-                  child: Text("B. ${_questions[_question_no].optionB}")),
-              TextButton(
-                  onPressed: () =>
-                      checkAnswer(_questions[_question_no].optionC),
-                  child: Text("C. ${_questions[_question_no].optionC}")),
-              TextButton(
-                  onPressed: () =>
-                      checkAnswer(_questions[_question_no].optionD),
-                  child: Text("D. ${_questions[_question_no].optionD}")),
-                
-              const SizedBox(height: 30),
+              for (var option in [
+                question.optionA,
+                question.optionB,
+                question.optionC,
+                question.optionD
+              ])
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: ElevatedButton(
+                    onPressed: _isRunning ? () => checkAnswer(option) : null,
+                    child: Text(option),
+                  ),
+                ),
+              const SizedBox(height: 20),
               ElevatedButton(
                 onPressed: () {
                   setState(() {

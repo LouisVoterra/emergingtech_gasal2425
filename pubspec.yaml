@@ -67,6 +67,15 @@ flutter:
     - assets/hulk.jpeg
     - assets/mark.jpeg
     - assets/ufo.gif
+    - assets/programming.png
+    - assets/mars.png
+    - assets/fruit.png
+    - assets/camera.png
+    - assets/browser.png
+    - assets/avengers.png
+    - assets/teletubbies.png
+    - assets/justiceleague.png
+    - assets/bts.png
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
