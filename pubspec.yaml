@@ -39,6 +39,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   shared_preferences: ^2.5.3 #dependency Share Preferences buat nyimpen data di local storage
   percent_indicator: ^4.2.5
+  http: ^1.5.0 #dependency http buat fetch data dari API
 
  
 dev_dependencies:
