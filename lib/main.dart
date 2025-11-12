@@ -13,6 +13,7 @@ import 'studentlist.dart';
 import 'login.dart';
 import 'animasi.dart';
 import 'popularmovie.dart';
+import 'personmovie.dart';
 
 String active_user = "";
 
@@ -97,6 +98,7 @@ class MyApp extends StatelessWidget {
         'login': (context) => MyLogin(),
         'Animasi': (context) => const Animasi(),
         'PopularMovie': (context) => const PopularMovie(),
+        'PersonMovie': (context) => const PersonsMovie(),
       },
       home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
@@ -206,6 +208,13 @@ class _MyHomePageState extends State<MyHomePage> {
               leading: const Icon(Icons.movie),
               onTap: () {
                 Navigator.pushNamed(context, "PopularMovie");
+              },
+            ),
+            ListTile(
+              title: const Text("Person Movie"),
+              leading: const Icon(Icons.person),
+              onTap: () {
+                Navigator.pushNamed(context, "PersonMovie");
               },
             ),
             ListTile(

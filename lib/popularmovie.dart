@@ -18,7 +18,7 @@ class _PopularMovieState extends State<PopularMovie> {
   //kadang lemot kadang cepet
   Future<String> fetchData() async {
     //await ini intinya nunggu sampai data datang
-    final response = await http.get(Uri.parse("http://localhost/flutterdb/movielist.php"));
+    final response = await http.get(Uri.parse("https://ubaya.cloud/flutter/160422077/movie/movielist.php"));
     if (response.statusCode == 200) {
       return response.body; //retun string, jadi future juga harus string
     } else {
