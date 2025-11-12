@@ -36,7 +36,7 @@ class _PersonsMovieState extends State<PersonsMovie>{
        PsMs.add(pm); 
       }
       setState(() {
-        _temp = PsMs[2].name;
+        _temp = PsMs[1].name;
       });
     });
   }
