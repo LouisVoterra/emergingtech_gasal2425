@@ -11,13 +11,16 @@ class PopMovie {
     required this.overview,
     required this.voteAverage,
   });
+
+  //method ini buat convert dari json array ke object 
+  factory PopMovie.fromJson(Map<String, dynamic> json){
+    return PopMovie(
+      id: json['movie_id'] as int,
+      title: json['title'] as String,
+      overview: json['overview'] as String,
+      voteAverage: json['voteAverage'] != null ? json['voteAverage'].toString(): '0.0'
+    ); 
+  }
 }
 
-// factory PopMovie.fromJson(Map<String, dynamic> json){
-//   return PopMovie(
-//     id: json['id'] as int,
-//     title: json['title'] as String,
-//     overview: json['overview'] as String,
-//     voteAverage: json['vote_average'] != null ? json['vote_average'].toString() : '0.0',
-//   );
-// }
+
