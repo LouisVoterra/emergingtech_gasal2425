@@ -1,6 +1,9 @@
-import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
 
+import 'package:flutter/material.dart';
+import 'package:http/http.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:http/http.dart' as http;
 // Import halaman lain
 import 'package:emergingtech_gasal2425_louis/Quiz.dart';
 import 'package:emergingtech_gasal2425_louis/about.dart';
@@ -14,44 +17,16 @@ import 'login.dart';
 import 'animasi.dart';
 import 'popularmovie.dart';
 import 'personmovie.dart';
+import 'login.dart';
 
-String active_user = "";
-
+// String active_user = "";
 
 
 
 Future<String> checkUser() async {
   final prefs = await SharedPreferences.getInstance();
-  String user_id = prefs.getString("user_id") ?? '';
-  return user_id;
-}
-
-Future<void> doLogin(String userId, BuildContext context) async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.setString("user_id", userId);
-  active_user = userId;
-
-// void doLogin() async {
-//   final prefs = await SharedPreferences.getInstance();
-//   prefs.setString("user_id", active_user);
-//   main();
-
-  // arahkan ke halaman utama, bukan panggil main()
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (_) => const MyApp()),
-  );
-}
-
-Future<void> doLogout(BuildContext context) async {
-  final prefs = await SharedPreferences.getInstance();
-  await prefs.remove("user_id");
-  active_user = "";
-
-  Navigator.pushReplacement(
-    context,
-    MaterialPageRoute(builder: (_) => MyLogin()),
-  );
+  String user_name = prefs.getString("user_name") ?? '';
+  return user_name;
 }
 
 //cara pak andre
@@ -89,6 +64,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
       ),
+      home: const MyHomePage(title: 'Flutter Demo Home Page'),
       routes: {
         'about': (context) => const About(),
         'basket': (context) => Basket(),
@@ -100,10 +76,8 @@ class MyApp extends StatelessWidget {
         'PopularMovie': (context) => const PopularMovie(),
         'PersonMovie': (context) => const PersonsMovie(),
       },
-      home: const MyHomePage(title: 'Flutter Demo Home Page'),
     );
   }
-
 }
 
 class MyHomePage extends StatefulWidget {
@@ -115,18 +89,36 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
+
+  //week 2
   int _currentIndex = 0;
+
+  //week 2
+  String smile = String.fromCharCodes(Runes('\u{1F60B}'));
+  String angry = String.fromCharCodes(Runes('\u{1F621}'));
+  String emo = "";
+
+  //week 2
   final List<Widget> _screens = [Home(), Search(), History()];
   final List<String> _titles = ["Home", "Search", "History"];
+
+  //week 6
+  String _user_name = "";
 
   @override
   void initState() {
     super.initState();
     checkUser().then((value) {
       setState(() {
-        active_user = value;
+        _user_name = value;
       });
     });
+  }
+
+  void doLogout() async {
+    final prefs = await SharedPreferences.getInstance();
+    prefs.remove('user_id');
+    main();
   }
 
   @override
@@ -138,7 +130,7 @@ class _MyHomePageState extends State<MyHomePage> {
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
-            onPressed: () => doLogout(context),
+            onPressed: () => doLogout(),
           ),
         ],
       ),
@@ -148,11 +140,11 @@ class _MyHomePageState extends State<MyHomePage> {
         child: Column(
           children: <Widget>[
             UserAccountsDrawerHeader(
-              accountName: const Text("Louis Dewa Voterra"),
-              accountEmail: Text(active_user.isEmpty ? "Loading..." : active_user),
+              accountName: const Text("Gilbert Maynard Saragih"),
+              accountEmail: Text(_user_name == "" ? "Loading..." : _user_name),
               currentAccountPicture: const CircleAvatar(
                 backgroundImage: NetworkImage(
-                  "https://my.ubaya.ac.id/img/mhs/160422077_l.jpg",
+                  "https://my.ubaya.ac.id/img/mhs/160422075_l.jpg",
                 ),
               ),
             ),
@@ -221,7 +213,7 @@ class _MyHomePageState extends State<MyHomePage> {
               title: const Text("Logout"),
               leading: const Icon(Icons.logout),
               onTap: () {
-                doLogout(context);
+                doLogout();
               },
             ),
           ],

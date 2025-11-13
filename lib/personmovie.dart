@@ -52,7 +52,8 @@ class _PersonsMovieState extends State<PersonsMovie>{
               children: <Widget> [
                 ListTile(
                   leading: const Icon(Icons.person),
-                  title: Text(PersMovs[index].name)
+                  title: Text(PersMovs[index].name + " - " + PersMovs[index].character)
+
                 )
               ]
             )

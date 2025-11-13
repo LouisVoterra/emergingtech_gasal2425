@@ -4,12 +4,14 @@ class PopMovie {
   String title;
   String overview;
   String voteAverage;
+  List? genres;
 
   PopMovie({
     required this.id,
     required this.title,
     required this.overview,
     required this.voteAverage,
+    this.genres,
   });
 
   //method ini buat convert dari json array ke object 
@@ -18,7 +20,8 @@ class PopMovie {
       id: json['movie_id'] as int,
       title: json['title'] as String,
       overview: json['overview'] as String,
-      voteAverage: json['voteAverage'] != null ? json['voteAverage'].toString(): '0.0'
+      voteAverage: json['voteAverage'] != null ? json['voteAverage'].toString(): '0.0',
+      genres: json['genres']
     ); 
   }
 }

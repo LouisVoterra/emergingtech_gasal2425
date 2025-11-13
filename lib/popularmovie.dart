@@ -1,8 +1,10 @@
 import 'dart:convert';
 
+import 'package:emergingtech_gasal2425_louis/detailpop.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'class/popmovie.dart';
+import 'detailpop.dart';
 
 class PopularMovie extends StatefulWidget {
   const PopularMovie({super.key});
@@ -13,12 +15,16 @@ class PopularMovie extends StatefulWidget {
 
 class _PopularMovieState extends State<PopularMovie> {
   String _temp = "waiting API respond . . .";
+  String _txtcari = "";
+
   List <PopMovie> PMs = [];
 
   //kadang lemot kadang cepet
   Future<String> fetchData() async {
     //await ini intinya nunggu sampai data datang
-    final response = await http.get(Uri.parse("https://ubaya.cloud/flutter/160422077/movie/movielist.php"));
+    final response = await http.post(Uri.parse("https://ubaya.cloud/flutter/160422077/movie/movielist.php"),
+    body: {'cari': _txtcari} //ngirim data pake post
+);
     if (response.statusCode == 200) {
       return response.body; //retun string, jadi future juga harus string
     } else {
@@ -31,14 +37,17 @@ class _PopularMovieState extends State<PopularMovie> {
     //memanggil fungsi fetchData
     Future<String> data = fetchData();
     data.then((value){
-      Map json = jsonDecode(value);
-      for (var mov in json['data']){
-       PopMovie pm = PopMovie.fromJson(mov);
-       PMs.add(pm); 
-      }
-      setState(() {
-        _temp = PMs[2].overview;
-      });
+        Map json = jsonDecode(value);
+        PMs.clear();
+        if(json['result']=='success'){ 
+          for (var mov in json['data']){
+          PopMovie pm = PopMovie.fromJson(mov);
+          PMs.add(pm); 
+          }
+        }
+        setState(() {
+            // _temp = PMs[0].title;
+        });
     });
   }
 
@@ -53,7 +62,17 @@ class _PopularMovieState extends State<PopularMovie> {
               children: <Widget>[
                 ListTile(
                   leading: const Icon(Icons.movie),
-                  title: Text(PopMovs[index].title),
+                  title: GestureDetector(
+                    child: Text(PopMovs[index].title),
+                    onTap: (){
+                      Navigator.push(
+                        context, 
+                        MaterialPageRoute(
+                          builder: (context) => Detailpop(movieID: PMs[index].id,)
+                        ),
+                      );
+                    }
+                  ),
                   subtitle: Text(PopMovs[index].overview),
                 )
               ],
@@ -81,12 +100,26 @@ class _PopularMovieState extends State<PopularMovie> {
         ),
         body: ListView(
           children: [
+            TextFormField(
+              decoration: const InputDecoration(
+                icon: Icon(Icons.search),
+                labelText: 'Judul mengandung kata:',
+              ),
+              onFieldSubmitted: (value){
+                _txtcari = value;
+                PMs.clear();
+                bacaData();
+              },
+            ),
+
             Container(
               height: MediaQuery.of(context).size.height-200,
-              child: DaftarPopMovie(PMs),
+              child: PMs.length > 0 ? DaftarPopMovie(PMs):Text('tidak ada data'),
             )
           ],
         ),
     );
   }
 }
+
+

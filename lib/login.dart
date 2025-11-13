@@ -1,4 +1,8 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'main.dart';
 
 class MyLogin extends StatelessWidget {
@@ -22,8 +26,38 @@ class Login extends StatefulWidget {
 }
 
 class _LoginState extends State<Login> {
-  String _email = "";
-  String _password = "";
+
+  String _user_id = "";
+  String _user_password = "";
+  String _error_login = "";
+
+  void doLogin() async{
+  // if (_user_id != "") {
+    //   final prefs = await SharedPreferences.getInstance();
+    //   prefs.setString("user_id", _user_id);
+    //   main();
+    // }
+
+  final response = await http.post(Uri.parse("https://ubaya.cloud/flutter/160422077/movie/login.php"),
+    body: {'user_id': _user_id, 'user_password': _user_password});
+    if (response.statusCode == 200){
+      Map json = jsonDecode(response.body);
+      if (json['result']=='success'){
+        final prefs = await SharedPreferences.getInstance();
+        prefs.setString("user_id", _user_id);
+        prefs.setString("user_name", json['user_name']);
+        main();
+      }
+      else{
+        setState(() {
+          _error_login = "Incorrect user or password";
+        });   
+      }
+    }else{
+      throw Exception('Failed to load data from API');
+    }
+}
+  
 
 
   @override
@@ -40,33 +74,36 @@ class _LoginState extends State<Login> {
           borderRadius: BorderRadius.all(Radius.circular(10)),
           border: Border.all(width: 1),
           color: Colors.white,
-          boxShadow: [BoxShadow(blurRadius: 5)]),
-          child: Column(children: [
-            Padding(
-              padding: EdgeInsets.all(10),
-              child: TextField(
-                onChanged: (v) {
-                  _email = v;
-                  active_user = v;
-                },
-                decoration: InputDecoration(
-                    border: OutlineInputBorder(),
-                    labelText: 'Email',
-                    hintText: 'Enter valid email id as abc@gmail.com'),
+          boxShadow: [
+            BoxShadow(blurRadius: 5)
+            ]
+          ),
+          child: Column(
+            children: [
+              Padding(
+                padding: EdgeInsets.all(10),
+                  child: TextField(
+                  onChanged: (v) {
+                    _user_id = v;
+                  },
+                  decoration: InputDecoration(
+                      border: OutlineInputBorder(),
+                      labelText: 'Email',
+                      hintText: 'Enter valid email id as abc@gmail.com'),
+                ),
               ),
-            ),
             Padding(
               padding: EdgeInsets.all(10),
               //padding: EdgeInsets.symmetric(horizontal: 15),
               child: TextField(
                 onChanged: (v) {
-                  _password = v;
+                  _user_password = v;
                 },
                 obscureText: true,
                 decoration: InputDecoration(
                     border: OutlineInputBorder(),
                     labelText: 'Password',
-                    hintText: 'Enter secure password'),
+                    hintText: 'Enter  secure password'),
               ),
             ),
             Padding(
@@ -75,18 +112,11 @@ class _LoginState extends State<Login> {
                   height: 50,
                   width: 300,
                   decoration: BoxDecoration(
-                         borderRadius: BorderRadius.circular(20)),
-                  child: ElevatedButton(
-                    onPressed: () {
-                    // Contoh sederhana — login tanpa validasi
-                    if (_email.isNotEmpty && _password.isNotEmpty) {
-                      doLogin(_email, context); // simpan ke SharedPreferences & arahkan ke MyApp
-                    } else {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text("Email dan Password tidak boleh kosong")),
-                      );
-                    }
-                  },
+                         borderRadius: BorderRadius.all(Radius.circular(20))),
+                    child: ElevatedButton(
+                      onPressed: () {
+                        doLogin();
+                    },
                     child: Text(
                       'Login',
                       style: TextStyle(fontSize: 25),
