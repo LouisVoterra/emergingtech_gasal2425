@@ -18,6 +18,7 @@ import 'animasi.dart';
 import 'popularmovie.dart';
 import 'personmovie.dart';
 import 'login.dart';
+import 'newpopmovie.dart';
 
 // String active_user = "";
 
@@ -75,6 +76,7 @@ class MyApp extends StatelessWidget {
         'Animasi': (context) => const Animasi(),
         'PopularMovie': (context) => const PopularMovie(),
         'PersonMovie': (context) => const PersonsMovie(),
+        'NewPopMovie': (context) => const NewPopMovie(),
       },
     );
   }
@@ -210,6 +212,13 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             ),
             ListTile(
+              title: const Text("New Pop Movie"),
+              leading: const Icon(Icons.movie_filter),
+              onTap: () {
+                Navigator.pushNamed(context, "NewPopMovie");
+              },
+            ),
+            ListTile( 
               title: const Text("Logout"),
               leading: const Icon(Icons.logout),
               onTap: () {

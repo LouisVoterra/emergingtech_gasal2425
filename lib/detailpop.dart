@@ -32,6 +32,22 @@ class _DetailpopState extends State<Detailpop> {
     }
   }
 
+  Future<String> deleteMovie() async {
+  final response = await http.post(
+    Uri.parse("https://ubaya.cloud/flutter/160422077/movie/deletemovie.php"),
+    body: {'id': widget.movieID.toString()}
+  );
+
+  if (response.statusCode == 200) {
+    return response.body;
+  } else {
+    // TAMBAHAN: Print error dari server untuk memudahkan perbaikan
+    print("Server Error: ${response.statusCode}");
+    print("Message: ${response.body}"); 
+    throw Exception('Failed to load data from API ');
+  }
+}
+
   BacaData(){
     fetchData().then((value){
       Map json = jsonDecode(value);
@@ -70,7 +86,38 @@ class _DetailpopState extends State<Detailpop> {
                     itemCount: _pm?.genres?.length,
                     itemBuilder: (BuildContext ctxt, int index) {
                       return Text(_pm?.genres?[index]['genre_name']);
-                    }))
+                    })),
+                    Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Colors.red, // Warna Merah
+                foregroundColor: Colors.white, // Warna Teks Putih
+                minimumSize: const Size.fromHeight(50), // Tombol lebar penuh
+              ),
+              onPressed: () {
+                // Panggil fungsi delete saat ditekan
+                deleteMovie().then((value) {
+                   // Decode hasil JSON dari PHP
+                   var result = jsonDecode(value);
+                   
+                   if (result['result'] == 'success') {
+                     // Jika sukses, tampilkan pesan dan kembali ke halaman sebelumnya
+                     ScaffoldMessenger.of(context).showSnackBar(
+                       const SnackBar(content: Text('Data berhasil dihapus'))
+                     );
+                     Navigator.pop(context); // Kembali ke list movie
+                   } else {
+                     // Jika gagal
+                     ScaffoldMessenger.of(context).showSnackBar(
+                       SnackBar(content: Text('Gagal menghapus: ${result['message']}'))
+                     );
+                   }
+                });
+              },
+              child: const Text("DELETE MOVIE"),
+            ),
+          )
           ],
         ),
       );
