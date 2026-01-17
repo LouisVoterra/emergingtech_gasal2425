@@ -5,7 +5,7 @@ class PersonMovie{
 
   PersonMovie({
     required this.id,
-    required this.name,
+    required this.name, 
     required this.character
   });
 

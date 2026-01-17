@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:emergingtech_gasal2425_louis/class/popmovie.dart';
+import 'package:emergingtech_gasal2425_louis/editpopmovie.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'popularmovie.dart';
@@ -33,17 +34,14 @@ class _DetailpopState extends State<Detailpop> {
   }
 
   Future<String> deleteMovie() async {
-  final response = await http.post(
-    Uri.parse("https://ubaya.cloud/flutter/160422077/movie/deletemovie.php"),
-    body: {'id': widget.movieID.toString()}
+    final response = await http.post(Uri.parse("https://ubaya.cloud/flutter/160422077/movie/deletemovie.php"),
+    body: {'movie_id': widget.movieID.toString()}
   );
 
   if (response.statusCode == 200) {
     return response.body;
   } else {
-    // TAMBAHAN: Print error dari server untuk memudahkan perbaikan
-    print("Server Error: ${response.statusCode}");
-    print("Message: ${response.body}"); 
+    
     throw Exception('Failed to load data from API ');
   }
 }
@@ -117,7 +115,21 @@ class _DetailpopState extends State<Detailpop> {
               },
               child: const Text("DELETE MOVIE"),
             ),
-          )
+          ),
+          Padding(
+              padding: EdgeInsets.all(10),
+              child: ElevatedButton(
+                child: Text('Edit'),
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) =>
+                          EditPopMovie(movieID: widget.movieID),
+                    ),
+                  );
+                },
+              )),
           ],
         ),
       );
