@@ -5,6 +5,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:http/http.dart' as http;
 import 'genre.dart';
+import 'package:image_picker/image_picker.dart';
+
 
 class EditPopMovie extends StatefulWidget {
   final int movieID;
@@ -19,6 +21,8 @@ class EditPopMovie extends StatefulWidget {
 class EditPopMovieState extends State<EditPopMovie> {
   final _formKey = GlobalKey<FormState>();
   PopMovie? _pm;
+
+  Uint8List? _imageBytes; //variable untuk menyimpan data gambar dalam bentuk byte array, ada ? berarti boleh kosong dan cm bisa di akses di sini karena ada underscore
   
   final TextEditingController _titleCont = TextEditingController(); 
   final TextEditingController _homepageCont = TextEditingController();  
@@ -113,6 +117,105 @@ class EditPopMovieState extends State<EditPopMovie> {
     }); 
   });
  }
+  
+  //fungsi imgGaleri ini pakai async biar dijalankan di latar belakang dan tidak membekukan apps utama
+  imgGaleri() async {  
+    final picker = ImagePicker(); //membuat instance dari ImagePicker
+    final image = await picker.pickImage( //memanggil fungsi pickImage dari ImagePicker untuk memilih gambar dari galeri
+      source: ImageSource.gallery, //menentukan sumber gambar dari galeri
+      imageQuality: 50, //mengatur kualitas gambar yang dipilih menjadi 50 (skala 0-100)
+      maxHeight: 600, //mengatur tinggi maksimum gambar menjadi 600 piksel
+      maxWidth: 600, //mengatur lebar maksimum gambar menjadi 600 piksel
+    );
+    if (image != null) { //jika pengguna memilih gambar (tidak membatalkan)
+      final bytes = await image.readAsBytes(); //membaca data gambar sebagai byte array
+      setState(() { //memperbarui state widget
+        _imageBytes = bytes; //menyimpan byte array gambar ke dalam variable _imageBytes
+      });
+    }
+  }
+
+  imgKamera() async { //fungsi imgKamera ini pakai async biar dijalankan di latar belakang dan tidak membekukan apps utama
+    final picker = ImagePicker(); //membuat instance dari ImagePicker
+    final image = await picker.pickImage( //memanggil fungsi pickImage dari ImagePicker untuk mengambil gambar dari kamera
+      source: ImageSource.camera, //menentukan sumber gambar dari kamera
+      imageQuality: 20, //mengatur kualitas gambar yang diambil menjadi 20 (skala 0-100)
+    );
+    if (image != null) { //jika pengguna mengambil gambar (tidak membatalkan)
+      final bytes = await image.readAsBytes(); //membaca data gambar sebagai byte array
+      setState(() { //memperbarui state widget
+        _imageBytes = bytes; //menyimpan byte array gambar ke dalam variable _imageBytes
+      });
+    }
+  }
+
+ //note kalau di jalankan di simulator, fungsi kamera tidak akan berjalan karena simulator tidak punya hardware kamera
+ //atau lebih tepatnya simulator tidak bisa mengakses hardware kamera di komputer/laptop tempat simulator dijalankan
+
+
+
+
+//void _showPicker ini sifatnya private, jdi cuma bisa di akses di file ini aja, hal itu terjadi karena ada underscore di awal nama function 
+ void _showPicker(context) { //fungsi ini bertujuan untuk memunculkan popup bottom sheet untuk memilih sumber gambar, yaitu galeri or kamera
+    showModalBottomSheet( //showModalBottomSheet adalah fungsi bawaan dari flutter untuk memunculkan bottom sheet, panel ini sifatnya Modal, artinya pengguna harus memilih salah satu diantara pilihan atau menutupnya sendiri sebelum bisa berinteraksi di layar belakangnya lagi
+      context: context,
+      builder: (BuildContext bc) {
+        return SafeArea( 
+          child: Container(
+            color: Colors.white,
+            child: Wrap(
+              children: <Widget>[
+                ListTile(
+                  tileColor: Colors.white,
+                  leading: const Icon(Icons.photo_library),
+                  title: const Text('Galeri'),
+                  onTap: () {
+                    imgGaleri(); //fungsi imgGaleri dipanggil ketika pengguna memilih opsi galeri
+                    Navigator.of(context).pop(); //Navigator.of(context).pop() ini berfungsi untuk menutup bottom sheet setelah pengguna memilih opsi galeri
+                  }
+                  ,
+                ),
+                ListTile(
+                  leading: const Icon(Icons.photo_camera),
+                  title: const Text('Kamera'),
+                  onTap: () {
+                    imgKamera(); //fungsi imgKamera dipanggil ketika pengguna memilih opsi kamera
+                    Navigator.of(context).pop(); //Navigator.of(context).pop() ini berfungsi untuk menutup bottom sheet setelah pengguna memilih opsi kamera
+                  },
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void uploadScene64() async { //fungsi untuk mengupload gambar dalam bentuk base64 ke server
+    String base64Image = base64Encode(_imageBytes!); //mengubah byte array gambar menjadi string base64
+    final response = await http.post(  //mengirim data ke server menggunakan metode POST
+      Uri.parse("https://ubaya.cloud/flutter/160422077/uploadscene64.php"), //URL API untuk mengupload gambar
+      body: {'movie_id': widget.movieID.toString(), 'image': base64Image},//data yang dikirim ke server, berupa ID movie dan string base64 gambar
+    );
+    if (response.statusCode == 200) { //jika respon dari server memiliki status code 200 (berhasil)
+      Map json = jsonDecode(response.body); //mengurai respon JSON dari server
+      if (json['result'] == 'success') { //jika hasil dari respon JSON adalah 'success'
+        if (!mounted) return; //memastikan widget masih terpasang di widget tree sebelum memperbarui state
+        ScaffoldMessenger.of( //menampilkan pesan snackbar untuk memberi tahu pengguna bahwa upload berhasil
+          context, //menggunakan context dari widget saat ini
+        ).showSnackBar(SnackBar(content: Text('Sukses mengupload Scene'))); //menampilkan snackbar dengan pesan sukses
+        setState(() { //memperbarui state widget
+          bacaData();//memanggil fungsi bacaData untuk memperbarui data movie setelah upload berhasil
+        });
+      }
+    } else {
+      throw Exception('Failed to read API');
+    }
+  }
+
+
+
+
   
   void addGenre(genre_id) async {
     final response = await http.post(
@@ -328,7 +431,35 @@ class EditPopMovieState extends State<EditPopMovie> {
                       },
                 )),
                     if(_urlCont.text!='') Image.network(_urlCont.text),
-                
+
+              //const buat ngasi tau kalo teks itu nilai nya uda tetap
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 16.0), //ngasi jarak atas dan bawah sebesar 16
+                child: Text("Scenes")), //widget standard yang dimiliki oleh text untuk menampilkan string
+
+              Padding(
+                padding: const EdgeInsets.symmetric(vertical: 16.0), //ngasi jarak atas dan bawah sebesar 16 dan const biar ga berubah
+                child: ElevatedButton( // salah satu Material Design tombol klo di klik keluar efek bayangan 
+                  //onPressed itu pemicu klo tombol di klik, kode di dalam kurung kurawal akan dijalankan kalo di klik
+                  onPressed: () {
+                    _showPicker(context); //fungsi _showPicker dipanggil ketika tombol di klik
+                  },
+                  child: const Text('Pick Scenes')
+                ),
+              )  ,
+              if(_imageBytes != null) //kalau ada gambar yang dipilih, tampilkan gambar
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0),
+                  child: Image.memory(_imageBytes!)), //tampilkan gambar dari byte array yang disimpan di variable _imageBytes
+                if (_imageBytes != null)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 16.0), //ngasi jarak atas dan bawah sebesar 16 dan const biar ga berubah
+                  child: ElevatedButton( // salah satu Material Design tombol klo di klik keluar efek bayangan
+                    child: const Text("Upload"), //teks yang ditampilkan di dalam tombol
+                    onPressed: () => uploadScene64(), //fungsi uploadScene64 dipanggil ketika tombol di klik
+                  ),
+                ),
+   
               Padding(
                 padding: const EdgeInsets.symmetric(vertical: 16.0),
                 child: SizedBox(

@@ -1,10 +1,10 @@
 import 'dart:convert';
 
-import 'package:emergingtech_gasal2425_louis/detailpop.dart';
+import 'package:emergingtech_gasal2425_louis/detailmovie.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'class/popmovie.dart';
-import 'detailpop.dart';
+import 'detailmovie.dart';
 
 class PopularMovie extends StatefulWidget {
   const PopularMovie({super.key});

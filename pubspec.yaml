@@ -40,6 +40,7 @@ dependencies:
   shared_preferences: ^2.5.3 #dependency Share Preferences buat nyimpen data di local storage
   percent_indicator: ^4.2.5
   http: ^1.5.0 #dependency http buat request data ke API
+  image_picker: ^1.2.1 #dependency image picker buat ambil gambar dari gallery / camera
 
  
 dev_dependencies:

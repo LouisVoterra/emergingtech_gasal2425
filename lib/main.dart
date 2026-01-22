@@ -138,8 +138,8 @@ class _MyHomePageState extends State<MyHomePage> {
       ),
       body: _screens[_currentIndex],
       drawer: Drawer(
-        elevation: 16.0,
-        child: Column(
+        elevation: 16.0, 
+        child: ListView(
           children: <Widget>[
             UserAccountsDrawerHeader(
               accountName: const Text("Gilbert Maynard Saragih"),
